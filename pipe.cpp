@@ -46,13 +46,11 @@ bool Pipe::execute(){
                 if(dup2(fd[pipe_in], STDIN_FILENO) < 0){
                     exit(EXIT_FAILURE);
                 }
-                close(fd[pipe_in]);
             }
             if(i != n-1){
                 if(dup2(fd[pipe_out], STDOUT_FILENO) < 0){
                     exit(EXIT_FAILURE);
                 }
-                close(fd[pipe_out]);
             }
             
             std::vector<char*> args = getArgs(cmds_[i]);
@@ -63,6 +61,10 @@ bool Pipe::execute(){
             exit(EXIT_SUCCESS);
         }
         else{
+            // this way, the parent process's stdin and stdout is unchanged.
+            // tho processes share filedescriptors thru fork(), if you change stdin and stdout before entering a child process,  enevtually the stdout would be trapped in fd[2n-3].
+            // hence, the last command's output would point to fd[2n-3] instead of stdout.
+            // that's why it gets stuck.
             wpid = waitpid(pids[i], &status, 0);
             if(i != 0){
                 close(fd[pipe_in]);
@@ -86,20 +88,4 @@ std::vector<char*> Pipe::getArgs(char*& cmd){
     }
     args.push_back(nullptr);
     return args;
-}
-
-void Pipe::test(){
-    int fd[2] = {0}, status;
-    pid_t pid = fork();
-    
-    if(pid == -1){ // fail to fork
-        std::cout << "\nFail to fork.\n";
-    }
-    else if(pid == 0){ // child process
-        fd[0] = 10;
-    }
-    else{
-        waitpid(pid, &status, 0);
-        std::cout << fd[0] << std::endl;
-    }
 }

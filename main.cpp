@@ -31,6 +31,8 @@ bool execute3();
 int main(){
     bool status = true;
 
+    chdir("/Users/chominchun");
+    
     while(status){
         std::string cmd;
         std::vector<char*> args;
@@ -56,9 +58,6 @@ int main(){
                 break;
         }
     }
-        
-//    Pipe p;
-//    p.test();
     
     return 0;
 }
@@ -116,64 +115,3 @@ bool execute(std::vector<char*> args){
     
     return true;
 }
-
-//bool execute2(){
-//    int status;
-//
-//    pid_t pid = fork(), wpid;
-//
-//    if(pid == -1){ // fail to fork
-//        std::cout << "\nFail to fork.\n";
-//    }
-//    else if(pid == 0){ // child process
-//        system ("/bin/stty raw");
-//
-//        char c;
-////        do{
-//            c = getchar();
-////        } while(c != 'c');
-//
-//        system ("/bin/stty cooked");
-//
-//        std::cout << "XXXX" << std::endl;
-//        exit(0);
-//    }
-//    else{ // parent process
-//        do{
-//            std::cout << "wait " << std::endl;
-//            wpid = waitpid(pid, &status, 0);
-//            std::cout << "end " << std::endl;
-//        } while(!WIFEXITED(status) && !WIFSIGNALED(status));
-//
-////        std::cout << "x = " << *x_ptr << std::endl;
-//    }
-//
-//    return true;
-//}
-//
-//bool execute3(){
-//    int keyboard;
-//    int ret;
-//    char c;
-//    fd_set readfd;
-//    struct timeval timeout;
-//    keyboard = open("/dev/tty", O_RDONLY | O_NONBLOCK);
-//    assert(keyboard > 0);
-//    while (1)
-//    {
-//        timeout.tv_sec = 1;
-//        timeout.tv_usec = 0;
-//        FD_ZERO(&readfd);
-//        FD_SET(keyboard, &readfd);
-//        ret = select(keyboard + 1, &readfd, NULL, NULL, &timeout);
-//        if (FD_ISSET(keyboard, &readfd))
-//        {
-//            read(keyboard, &c, 1);
-//            std::cout << "Input is " << c << "\n";
-//            if (c == 'c')
-//                break;
-//        }
-//    }
-//
-//    return true;
-//}

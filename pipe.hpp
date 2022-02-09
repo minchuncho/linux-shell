@@ -22,7 +22,6 @@ public:
     ~Pipe(){}
     void getPipeCmds(std::string const& cmd);
     bool execute();
-    void test();
 private:
     std::vector<char*> getArgs(char*& cmd);
     
