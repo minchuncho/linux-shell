@@ -63,7 +63,7 @@ int main(){
 }
 
 void printCurDir(){
-    std::cout << std::filesystem::current_path() << " % ";
+    std::cout << std::__fs::filesystem::current_path() << " % ";
 }
 
 void readLine(std::string& cmd){

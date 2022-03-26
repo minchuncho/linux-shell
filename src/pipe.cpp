@@ -9,19 +9,24 @@
 
 void Pipe::getPipeCmds(std::string const& cmd){
     std::string del="|";
+    std::vector<int> del_pos;
     int start = 0, end = (int)cmd.find(del, start);
+
     while(end != -1){
-        std::string str = cmd.substr(start, end-start);
-        char* c = new char(str.length()+1);
-        strcpy(c, str.c_str());
-        cmds_.push_back(c);
+        del_pos.push_back(end);
         start = end+1;
         end = (int)cmd.find(del, start);
     }
-    std::string str = cmd.substr(start, end-start);
-    char* c = new char(str.length()+1);
-    strcpy(c, str.c_str());
-    cmds_.push_back(c);
+    del_pos.push_back(cmd.length());
+    start = 0;
+
+    for(int i=0; i<del_pos.size(); i++){
+        std::string str = cmd.substr(start, del_pos[i]-start);
+        char* c = new char(str.length()+1);
+        strcpy(c, str.c_str());
+        cmds_.push_back(c);
+        start = del_pos[i]+1;
+    }
 }
 
 bool Pipe::execute(){
@@ -61,16 +66,29 @@ bool Pipe::execute(){
             exit(EXIT_SUCCESS);
         }
         else{
-            // this way, the parent process's stdin and stdout is unchanged.
-            // tho processes share filedescriptors thru fork(), if you change stdin and stdout before entering a child process,  enevtually the stdout would be trapped in fd[2n-3].
-            // hence, the last command's output would point to fd[2n-3] instead of stdout.
-            // that's why it gets stuck.
-            wpid = waitpid(pids[i], &status, 0);
-            if(i != 0){
-                close(fd[pipe_in]);
-            }
-            if(i != n-1){
-                close(fd[pipe_out]);
+            /*  NOTE:
+                This way, the parent process's stdin and stdout is unchanged.
+                Tho processes share filedescriptors thru fork(), if you change stdin and stdout before entering a child process,  enevtually the stdout would be trapped in fd[2n-3].
+                Hence, the last command's output would point to fd[2n-3] instead of stdout. That's why it gets stuck.
+             */
+//            wpid = waitpid(pids[i], &status, 0);
+//            if(i != 0){
+//                close(fd[pipe_in]);
+//            }
+//            if(i != n-1){
+//                close(fd[pipe_out]);
+//            }
+            /*  NOTE:
+                Do not wait for a specific process to complete, instead, the parent should skip it and carry on to the next child process.
+                The reason os that while the previous child's output are large data and pipe cannot buffer them all at once, if the next process has not started, the pipe can explode.
+             */
+            while((wpid = waitpid(pids[i], &status, 0)) > 0){
+                if(i != 0){
+                    close(fd[pipe_in]);
+                }
+                if(i != n-1){
+                    close(fd[pipe_out]);
+                }
             }
         }
     }
