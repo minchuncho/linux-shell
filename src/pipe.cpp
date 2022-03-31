@@ -78,19 +78,21 @@ bool Pipe::execute(){
 //            if(i != n-1){
 //                close(fd[pipe_out]);
 //            }
-            /*  NOTE:
-                Do not wait for a specific process to complete, instead, the parent should skip it and carry on to the next child process.
-                The reason os that while the previous child's output are large data and pipe cannot buffer them all at once, if the next process has not started, the pipe can explode.
-             */
-            while((wpid = waitpid(pids[i], &status, 0)) > 0){
-                if(i != 0){
-                    close(fd[pipe_in]);
-                }
-                if(i != n-1){
-                    close(fd[pipe_out]);
-                }
+            if(i != 0){
+                close(fd[pipe_in]);
+            }
+            if(i != n-1){
+                close(fd[pipe_out]);
             }
         }
+    }
+    
+    /*  NOTE:
+        Do not wait for a specific process to complete, instead, the parent should skip it and carry on to the next child process.
+        The reason os that while the previous child's output are large data and pipe cannot buffer them all at once, if the next process has not started, the pipe can explode.
+     */
+    for(int i=0; i<n; i++){
+        wpid = waitpid(pids[i], &status, 0);
     }
 
     return true;
